@@ -92,6 +92,9 @@ pub fn lex_literal_brace() {
     #("enum", lex.Keyword(lex.TknEnum)),
     #("impl", lex.Keyword(lex.TknImpl)),
     #("interface", lex.Keyword(lex.TknInterface)),
+    #("struct", lex.Keyword(lex.TknStruct)),
+    #("\n", lex.NewLine),
+    #(".", lex.Literal(lex.Period)),
   ]
   |> list.each(fn(pair) {
     let assert #(input, expected) = pair

@@ -45,6 +45,7 @@ pub type TokenLiteral {
   Cons
   ConsEqual
   AtSign
+  Period
 }
 
 pub type TokenKeyword {
@@ -67,6 +68,7 @@ pub type TokenKeyword {
   TknEnum
   TknImpl
   TknInterface
+  TknStruct
 }
 
 pub type Token {
@@ -77,7 +79,14 @@ pub type Token {
   Empty
   LexError(String)
   Keyword(TokenKeyword)
+  NewLine
+  Identifier(String)
 }
+
+const illegal_identifier_characters = [
+  "\"", "{", "}", ",", ";", "(", ")", "[", "]", "=", "!", ">", ",", "+", "-",
+  "*", "/", "%", "&&", "|", "!", "+", "-", ">", ":", "@", "'", "'",
+]
 
 pub fn lex(input: String) -> LexResult {
   input
@@ -129,6 +138,7 @@ pub fn tokenize(input: String, output: List(Token)) -> LexResult {
     "::" <> rest -> #(Literal(Cons), rest)
     "::=" <> rest -> #(Literal(ConsEqual), rest)
     "@" <> rest -> #(Literal(AtSign), rest)
+    "." <> rest -> #(Literal(Period), rest)
     "if" <> rest -> #(Keyword(TknIf), rest)
     "else" <> rest -> #(Keyword(TknElse), rest)
     "elif" <> rest -> #(Keyword(TknElseIf), rest)
@@ -148,7 +158,10 @@ pub fn tokenize(input: String, output: List(Token)) -> LexResult {
     "enum" <> rest -> #(Keyword(TknEnum), rest)
     "impl" <> rest -> #(Keyword(TknImpl), rest)
     "interface" <> rest -> #(Keyword(TknInterface), rest)
-    _ -> #(Empty, string.drop_left(input, 1))
+    "struct" <> rest -> #(Keyword(TknStruct), rest)
+    "\n" <> rest -> #(NewLine, rest)
+    " " <> rest | "\t" <> rest | "\r" <> rest -> #(Empty, rest)
+    _ -> tokenize_identifier(input, "")
   }
 
   case get_token {
@@ -164,13 +177,13 @@ fn tokenize_number(input: String) -> #(Token, String) {
     Ok(#(n, rest)) ->
       result.try(
         n
-        |> to_num_token(),
+          |> to_num_token(),
         fn(t) { Ok(#(t, rest)) },
       )
     _ ->
       result.try(
         input
-        |> to_num_token(),
+          |> to_num_token(),
         fn(t) { Ok(#(t, "")) },
       )
   }
@@ -196,4 +209,9 @@ fn tokenize_string_literal(rest: String) -> #(Token, String) {
     Ok(#(str, rest)) -> #(StringLiteral(str), rest)
     _ -> #(LexError("Failed to parse string literal"), "")
   }
+}
+
+fn tokenize_identifier(input: String, output: String) -> #(Token, String) {
+  // NOTE: Similar to our regular tokenize, just terminate when you see any characters that are not allowed
+  todo
 }
