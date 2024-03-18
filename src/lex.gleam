@@ -12,8 +12,18 @@ type Iterator =
 pub type LexResult =
   Result(List(Token), String)
 
+pub type TokenLiteral {
+  LBrace
+  RBrace
+}
+
 pub type Token {
   Number(Float)
+  StringLiteral(String)
+  Literal(TokenLiteral)
+  Comment(String)
+  Empty
+  LexError(String)
 }
 
 pub fn lex(input: String) -> LexResult {
@@ -22,8 +32,8 @@ pub fn lex(input: String) -> LexResult {
 }
 
 pub fn tokenize(input: String, output: List(Token)) -> LexResult {
-  case input {
-    "" -> Ok(output)
+  let get_token = case input {
+    "" -> #(Empty, "")
     "0" <> _
     | "1" <> _
     | "2" <> _
@@ -33,29 +43,36 @@ pub fn tokenize(input: String, output: List(Token)) -> LexResult {
     | "6" <> _
     | "7" <> _
     | "8" <> _
-    | "9" <> _ ->
-      case string.split_once(input, " ") {
-        Ok(#(n, rest)) ->
-          result.try(
-            n
-            |> to_num_token(),
-            fn(t) {
-              tokenize(
-                rest,
-                output
-                |> list.append([t]),
-              )
-            },
-          )
-        _ ->
-          result.try(to_num_token(input), fn(t) { Ok(list.append(output, [t])) })
-      }
-    _ -> {
-      input
-      |> string.drop_left(1)
-      |> tokenize(output)
-    }
+    | "9" <> _ -> tokenize_number(input)
+    "\"" <> rest -> tokenize_string_literal(rest)
+    "[" <> rest -> #(Literal(LBrace), rest)
+    _ -> #(Empty, string.drop_left(input, 1))
   }
+
+  case get_token {
+    #(Empty, "") -> Ok(output)
+    #(Empty, rest) -> tokenize(rest, output)
+    #(LexError(e), _) -> Error(e)
+    #(token, rest) -> tokenize(rest, list.append(output, [token]))
+  }
+}
+
+fn tokenize_number(input: String) -> #(Token, String) {
+  case string.split_once(input, " ") {
+    Ok(#(n, rest)) ->
+      result.try(
+        n
+        |> to_num_token(),
+        fn(t) { Ok(#(t, rest)) },
+      )
+    _ ->
+      result.try(
+        input
+        |> to_num_token(),
+        fn(t) { Ok(#(t, "")) },
+      )
+  }
+  |> result.unwrap(#(LexError("Failed to parse number"), ""))
 }
 
 fn to_num_token(num_str: String) -> Result(Token, String) {
@@ -69,5 +86,12 @@ fn to_num_token(num_str: String) -> Result(Token, String) {
           |> Ok
         _ -> Error("Failed to parse number")
       }
+  }
+}
+
+fn tokenize_string_literal(rest: String) -> #(Token, String) {
+  case string.split_once(rest, on: "\"") {
+    Ok(#(str, rest)) -> #(StringLiteral(str), rest)
+    _ -> #(LexError("Failed to parse string literal"), "")
   }
 }

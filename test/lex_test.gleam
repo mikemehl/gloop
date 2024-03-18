@@ -20,3 +20,25 @@ pub fn lex_numbers_test() {
   |> lex.lex()
   |> should.equal(Ok([lex.Number(8_405_948_038.3490583048)]))
 }
+
+pub fn lex_string_literal_test() {
+  "\"hello world\""
+  |> lex.lex()
+  |> should.equal(Ok([lex.StringLiteral("hello world")]))
+
+  "\"hello world\" \"hello world\""
+  |> lex.lex()
+  |> should.equal(
+    Ok([lex.StringLiteral("hello world"), lex.StringLiteral("hello world")]),
+  )
+
+  "\"hello world\" \"hello world\" \"hello world"
+  |> lex.lex()
+  |> should.be_error()
+}
+
+pub fn lex_literal_brace() {
+  "["
+  |> lex.lex()
+  |> should.equal(Ok([lex.Literal(lex.LBrace)]))
+}
