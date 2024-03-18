@@ -47,6 +47,28 @@ pub type TokenLiteral {
   AtSign
 }
 
+pub type TokenKeyword {
+  TknIf
+  TknElse
+  TknElseIf
+  TknWhile
+  TknUntil
+  TknFor
+  TknModule
+  TknFn
+  TknLet
+  TknReturn
+  TknBreak
+  TknContinue
+  TknPanic
+  TknTodo
+  TknImport
+  TknType
+  TknEnum
+  TknImpl
+  TknInterface
+}
+
 pub type Token {
   Number(Float)
   StringLiteral(String)
@@ -54,6 +76,7 @@ pub type Token {
   Comment(String)
   Empty
   LexError(String)
+  Keyword(TokenKeyword)
 }
 
 pub fn lex(input: String) -> LexResult {
@@ -106,6 +129,25 @@ pub fn tokenize(input: String, output: List(Token)) -> LexResult {
     "::" <> rest -> #(Literal(Cons), rest)
     "::=" <> rest -> #(Literal(ConsEqual), rest)
     "@" <> rest -> #(Literal(AtSign), rest)
+    "if" <> rest -> #(Keyword(TknIf), rest)
+    "else" <> rest -> #(Keyword(TknElse), rest)
+    "elif" <> rest -> #(Keyword(TknElseIf), rest)
+    "while" <> rest -> #(Keyword(TknWhile), rest)
+    "until" <> rest -> #(Keyword(TknUntil), rest)
+    "for" <> rest -> #(Keyword(TknFor), rest)
+    "module" <> rest -> #(Keyword(TknModule), rest)
+    "fn" <> rest -> #(Keyword(TknFn), rest)
+    "let" <> rest -> #(Keyword(TknLet), rest)
+    "return" <> rest -> #(Keyword(TknReturn), rest)
+    "break" <> rest -> #(Keyword(TknBreak), rest)
+    "continue" <> rest -> #(Keyword(TknContinue), rest)
+    "panic" <> rest -> #(Keyword(TknPanic), rest)
+    "todo" <> rest -> #(Keyword(TknTodo), rest)
+    "import" <> rest -> #(Keyword(TknImport), rest)
+    "type" <> rest -> #(Keyword(TknType), rest)
+    "enum" <> rest -> #(Keyword(TknEnum), rest)
+    "impl" <> rest -> #(Keyword(TknImpl), rest)
+    "interface" <> rest -> #(Keyword(TknInterface), rest)
     _ -> #(Empty, string.drop_left(input, 1))
   }
 
