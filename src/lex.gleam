@@ -1,3 +1,4 @@
+import gleam/dict
 import gleam/iterator
 import gleam/list
 import gleam/string
@@ -15,6 +16,35 @@ pub type LexResult =
 pub type TokenLiteral {
   LBrace
   RBrace
+  Comma
+  Colon
+  Semicolon
+  LParen
+  RParen
+  LBracket
+  RBracket
+  Equal
+  EqualEqual
+  NotEqual
+  GreaterThan
+  GreaterThanEqual
+  LessThan
+  LessThanEqual
+  Plus
+  Minus
+  Star
+  Slash
+  Percent
+  And
+  Or
+  Not
+  PlusPlus
+  MinusMinus
+  Arrow
+  FatArrow
+  Cons
+  ConsEqual
+  AtSign
 }
 
 pub type Token {
@@ -45,7 +75,37 @@ pub fn tokenize(input: String, output: List(Token)) -> LexResult {
     | "8" <> _
     | "9" <> _ -> tokenize_number(input)
     "\"" <> rest -> tokenize_string_literal(rest)
-    "[" <> rest -> #(Literal(LBrace), rest)
+    "{" <> rest -> #(Literal(LBrace), rest)
+    "}" <> rest -> #(Literal(RBrace), rest)
+    "," <> rest -> #(Literal(Comma), rest)
+    ":" <> rest -> #(Literal(Colon), rest)
+    ";" <> rest -> #(Literal(Semicolon), rest)
+    "(" <> rest -> #(Literal(LParen), rest)
+    ")" <> rest -> #(Literal(RParen), rest)
+    "[" <> rest -> #(Literal(LBracket), rest)
+    "]" <> rest -> #(Literal(RBracket), rest)
+    "=" <> rest -> #(Literal(Equal), rest)
+    "==" <> rest -> #(Literal(EqualEqual), rest)
+    "!=" <> rest -> #(Literal(NotEqual), rest)
+    ">" <> rest -> #(Literal(GreaterThan), rest)
+    ">=" <> rest -> #(Literal(GreaterThanEqual), rest)
+    "<" <> rest -> #(Literal(LessThan), rest)
+    "<=" <> rest -> #(Literal(LessThanEqual), rest)
+    "+" <> rest -> #(Literal(Plus), rest)
+    "-" <> rest -> #(Literal(Minus), rest)
+    "*" <> rest -> #(Literal(Star), rest)
+    "/" <> rest -> #(Literal(Slash), rest)
+    "%" <> rest -> #(Literal(Percent), rest)
+    "&&" <> rest -> #(Literal(And), rest)
+    "||" <> rest -> #(Literal(Or), rest)
+    "!" <> rest -> #(Literal(Not), rest)
+    "++" <> rest -> #(Literal(PlusPlus), rest)
+    "--" <> rest -> #(Literal(MinusMinus), rest)
+    "->" <> rest -> #(Literal(Arrow), rest)
+    "=>" <> rest -> #(Literal(FatArrow), rest)
+    "::" <> rest -> #(Literal(Cons), rest)
+    "::=" <> rest -> #(Literal(ConsEqual), rest)
+    "@" <> rest -> #(Literal(AtSign), rest)
     _ -> #(Empty, string.drop_left(input, 1))
   }
 
