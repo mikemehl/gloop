@@ -4,17 +4,19 @@ import argv
 import glance
 import gleam/result
 import gleam/list
-import translate
 
 pub fn main() {
   io.println("Hello from gloop!")
-  use fname <- result.try(get_fname())
-  use content <- result.try(read_file(fname))
-  use ast <- result.try(to_ast(content))
-  Ok(
-    ast
-    |> translate.translate(),
-  )
+  case
+    {
+      use fname <- result.try(get_fname())
+      use content <- result.try(read_file(fname))
+      use ast <- result.try(to_ast(content))
+    }
+  {
+    Ok(_) -> Nil
+    _ -> io.println("Error reading file")
+  }
 }
 
 fn get_fname() -> Result(String, Nil) {
