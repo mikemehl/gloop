@@ -123,13 +123,34 @@ pub fn lex_identifier_test() {
     ]),
   )
 
-  "ajfajsfl:dj8lfjsad_lfj0"
+  "ajfajsfl:dj8lfjsad_lfj"
   |> lex.lex()
   |> should.equal(
     Ok([
       lex.Identifier("ajfajsfl"),
       lex.Literal(lex.Colon),
       lex.Identifier("dj8lfjsad_lfj"),
+    ]),
+  )
+
+  "ajfajsfl:dj8lfjsad_lfj0"
+  |> lex.lex()
+  |> should.equal(
+    Ok([
+      lex.Identifier("ajfajsfl"),
+      lex.Literal(lex.Colon),
+      lex.Identifier("dj8lfjsad_lfj0"),
+    ]),
+  )
+
+  "ajfajsfl:dj8lfjsad_lfj\n0"
+  |> lex.lex()
+  |> should.equal(
+    Ok([
+      lex.Identifier("ajfajsfl"),
+      lex.Literal(lex.Colon),
+      lex.Identifier("dj8lfjsad_lfj"),
+      lex.Number(0.0),
     ]),
   )
 }

@@ -209,8 +209,10 @@ fn tokenize_string_literal(rest: String) -> #(Token, String) {
 
 fn tokenize_identifier(input: String, identifier: String) -> #(Token, String) {
   case string.pop_grapheme(input) {
-    Ok(#(" ", rest)) -> #(Identifier(identifier), rest)
-    Ok(#(_, "")) -> #(Identifier(identifier), "")
+    Ok(#(s, rest)) if s == "\n" || s == " " || s == "\t" -> #(
+      Identifier(identifier),
+      rest,
+    )
     Ok(#(c, rest)) ->
       case check_illegal_chars(c) {
         True -> #(Identifier(identifier), input)
