@@ -103,3 +103,33 @@ pub fn lex_literal_brace() {
     |> should.equal(Ok([expected]))
   })
 }
+
+pub fn lex_identifier_test() {
+  "    hello_world    "
+  |> lex.lex()
+  |> should.equal(Ok([lex.Identifier("hello_world")]))
+
+  " hello_w@rld----"
+  |> lex.lex()
+  |> should.equal(
+    Ok([
+      lex.Identifier("hello_w"),
+      lex.Literal(lex.AtSign),
+      lex.Identifier("rld"),
+      lex.Literal(lex.Minus),
+      lex.Literal(lex.Minus),
+      lex.Literal(lex.Minus),
+      lex.Literal(lex.Minus),
+    ]),
+  )
+
+  "ajfajsfl:dj8lfjsad_lfj0"
+  |> lex.lex()
+  |> should.equal(
+    Ok([
+      lex.Identifier("ajfajsfl"),
+      lex.Literal(lex.Colon),
+      lex.Identifier("dj8lfjsad_lfj"),
+    ]),
+  )
+}

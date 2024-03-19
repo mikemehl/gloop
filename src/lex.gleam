@@ -1,14 +1,9 @@
-import gleam/dict
-import gleam/iterator
+import gleam/io
 import gleam/list
 import gleam/string
 import gleam/result
-import gleam/regex
 import gleam/float
 import gleam/int
-
-type Iterator =
-  iterator.Iterator(String)
 
 pub type LexResult =
   Result(List(Token), String)
@@ -166,9 +161,10 @@ pub fn tokenize(input: String, output: List(Token)) -> LexResult {
 
   case get_token {
     #(Empty, "") -> Ok(output)
-    #(Empty, rest) -> tokenize(rest, output)
+    #(Empty, rest) -> tokenize(string.trim_left(rest), output)
     #(LexError(e), _) -> Error(e)
-    #(token, rest) -> tokenize(rest, list.append(output, [token]))
+    #(token, rest) ->
+      tokenize(string.trim_left(rest), list.append(output, [token]))
   }
 }
 
@@ -211,7 +207,20 @@ fn tokenize_string_literal(rest: String) -> #(Token, String) {
   }
 }
 
-fn tokenize_identifier(input: String, output: String) -> #(Token, String) {
-  // NOTE: Similar to our regular tokenize, just terminate when you see any characters that are not allowed
-  todo
+fn tokenize_identifier(input: String, identifier: String) -> #(Token, String) {
+  case string.pop_grapheme(input) {
+    Ok(#(" ", rest)) -> #(Identifier(identifier), rest)
+    Ok(#(_, "")) -> #(Identifier(identifier), "")
+    Ok(#(c, rest)) ->
+      case check_illegal_chars(c) {
+        True -> #(Identifier(identifier), input)
+        False -> tokenize_identifier(rest, string.append(identifier, c))
+      }
+    _ -> #(Identifier(identifier), "")
+  }
+}
+
+fn check_illegal_chars(s: String) -> Bool {
+  illegal_identifier_characters
+  |> list.any(fn(c) { s == c })
 }
