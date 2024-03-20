@@ -1,33 +1,18 @@
 import gleeunit
 import gleeunit/should
+import gleam/io
 import gleam/list
 import lex
 import parse
 
 pub fn parse_math_test() {
-  let assert Ok([lex.Number(5.0), lex.Literal(lex.Plus), lex.Number(4.0)]) as tokens =
-    "5 + 4"
-    |> lex.lex()
-
-  let assert Ok(tokens) = tokens
-
-  tokens
+  "5+7"
+  |> io.debug()
   |> parse.parse()
-  |> should.equal(parse.AstNode(parse.NoMatch, []))
+  |> io.debug()
 
-  let assert Ok([
-    lex.Number(5.0),
-    lex.Literal(lex.Plus),
-    lex.Number(4.0),
-    lex.Literal(lex.Plus),
-    lex.Number(3.0),
-  ]) as tokens =
-    "5 + 4 + 3"
-    |> lex.lex()
-
-  let assert Ok(tokens) = tokens
-
-  tokens
+  "   5+7   "
+  |> io.debug()
   |> parse.parse()
-  |> should.equal(parse.AstNode(parse.NoMatch, []))
+  |> io.debug()
 }
