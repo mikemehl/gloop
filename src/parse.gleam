@@ -1,32 +1,94 @@
+import gleam/option.{type Option}
+import gleam/result
 import gleam/list
 import lex.{
-  Comment, Empty, Identifier, Keyword, LexError, Literal, NewLine, Number,
-  StringLiteral,
+  type Token, type TokenLiteral, Comment, Empty, Identifier, Keyword, LexError,
+  Literal, NewLine, Number, StringLiteral,
 }
+
+// GRAMMAR TIME
+// program: statement*
+// statement: expression | expression statement
+// expression: literal binary_operation expression | literal 
+// literal: number | identifier
 
 pub type AstNode {
-  AddOperation(AstNode, AstNode)
-  NumberLiteral(Float)
+  End
+  Bad
+  AstNode(AstNode, List(AstNode))
+  Program(List(AstNode))
+  Statement(AstNode, List(AstNode))
+  Expr(List(AstNode))
+  Num(Token)
+  Id(Token)
+  BinOp(TokenLiteral)
+  NoMatch
 }
 
-// GRAMMAR TIME:
-// program -> statement [statement]
-// statement -> expr | declaration
-// declaration -> ??? // TODO
-// expr -> math_expr
-// math_expr -> add_expr | numeric
-// add_expr -> nueric PLUS math_expr
-// numeric -> number | numeric_identifier
-//
-
-pub fn parse(input: List(lex.Token)) -> Result(List(AstNode), String) {
-  input
-  |> parse_tokens([])
+pub fn parse(input: List(Token)) -> AstNode {
+  program(input)
 }
 
-pub fn parse_tokens(
-  input: List(lex.Token),
-  output: List(AstNode),
-) -> Result(List(AstNode), String) {
-  todo
+fn program(input: List(Token)) -> AstNode {
+  case input {
+    [] -> NoMatch
+    _ -> {
+      let #(stmt, rest) = statement(input)
+      case stmt {
+        NoMatch -> NoMatch
+        _ -> {
+          let prog = program(rest)
+          Program([stmt, prog])
+        }
+      }
+    }
+  }
+}
+
+fn statement(input: List(Token)) -> #(AstNode, List(Token)) {
+  case input {
+    [] -> #(NoMatch, [])
+    _ -> {
+      let #(expr, rest) = expression(input)
+      let #(stmt, more) = statement(input)
+      case stmt {
+        NoMatch -> {
+          #(Statement(expr, []), rest)
+        }
+        _ -> #(Statement(expr, [stmt]), more)
+      }
+    }
+  }
+}
+
+fn expression(input: List(Token)) -> #(AstNode, List(Token)) {
+  let #(lit, rest) = literal(input)
+  case binary_operation(rest) {
+    #(NoMatch, []) -> #(Expr([lit]), rest)
+    #(BinOp(_) as b, rest) -> {
+      let #(expr, rest) = expression(rest)
+      #(Expr([lit, b, expr]), rest)
+    }
+    _ -> #(Bad, input)
+  }
+}
+
+fn binary_operation(input: List(Token)) -> #(AstNode, List(Token)) {
+  case input {
+    [Literal(c), ..rest] -> {
+      case c {
+        lex.Plus | lex.Minus | lex.Star | lex.Slash -> #(BinOp(c), rest)
+        _ -> #(NoMatch, [])
+      }
+    }
+    _ -> #(NoMatch, [])
+  }
+}
+
+fn literal(input: List(Token)) -> #(AstNode, List(Token)) {
+  case input {
+    [Number(_) as t, ..rest] -> #(Num(t), rest)
+    [Identifier(_) as t, ..rest] -> #(Id(t), rest)
+    _ -> #(Bad, input)
+  }
 }

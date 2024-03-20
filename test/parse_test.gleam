@@ -13,9 +13,7 @@ pub fn parse_math_test() {
 
   tokens
   |> parse.parse()
-  |> should.equal(
-    Ok([parse.AddOperation(parse.NumberLiteral(5.0), parse.NumberLiteral(4.0))]),
-  )
+  |> should.equal(parse.AstNode(parse.NoMatch, []))
 
   let assert Ok([
     lex.Number(5.0),
@@ -31,12 +29,5 @@ pub fn parse_math_test() {
 
   tokens
   |> parse.parse()
-  |> should.equal(
-    Ok([
-      parse.AddOperation(
-        parse.AddOperation(parse.NumberLiteral(5.0), parse.NumberLiteral(4.0)),
-        parse.NumberLiteral(3.0),
-      ),
-    ]),
-  )
+  |> should.equal(parse.AstNode(parse.NoMatch, []))
 }
