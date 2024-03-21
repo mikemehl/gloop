@@ -17,7 +17,7 @@ pub type Cst(a) {
 }
 
 pub type Node {
-  BinExpr
+  MathExpr
   Number(Int)
   Plus
   Minus
@@ -35,13 +35,12 @@ pub fn parse(
 }
 
 fn parser() -> Parser(String, List(Cst(Node))) {
-  many1(bin_expr())
+  many1(math_expr())
 }
 
-fn bin_expr() -> Parser(String, Cst(Node)) {
-  [num(), bin_op(), num()]
-  |> seq()
-  |> map(Cst(BinExpr, _))
+fn math_expr() -> Parser(String, Cst(Node)) {
+  alt(seq([num(), bin_op(), lazy(math_expr)]), seq([num()]))
+  |> map(Cst(MathExpr, _))
 }
 
 fn num() -> Parser(String, Cst(Node)) {

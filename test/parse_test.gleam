@@ -6,6 +6,10 @@ import lex
 import parse
 
 pub fn parse_math_test() {
+  "   5    "
+  |> io.debug()
+  |> parse.parse()
+  |> io.debug()
   "5+7"
   |> io.debug()
   |> parse.parse()
