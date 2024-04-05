@@ -15,7 +15,7 @@ gleam = ">= 0.32.0"
 
 [dependencies]
 gleam_stdlib = "~> 0.34 or ~> 1.0"
-glance = "~> 0.8"
+nibble = "~> 1.1"
 
 [dev-dependencies]
 gleeunit = "~> 1.0"
